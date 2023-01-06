@@ -1,0 +1,193 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace 委托
+{
+    internal class Program
+    {
+        //委托的声明
+        delegate void IntMethodInvoker(int x);
+        delegate long TwoLong(long a, long b);
+        delegate string GetAString();
+        
+        static void Main(string[] args)
+        {
+            IntMethodInvoker invoker = null;
+            TwoLong invoker2 = null;
+            //委托使用1：将委托指向同参数的函数，调用委托==调用函数
+            //委托可以指向静态方法也能指向实例方法（也能指向委托名创建的方法）    
+            invoker = Program.Test;
+            invoker(100);
+            //委托不为空
+            if (invoker2 != null)
+            {
+                invoker2(2,3);
+            }
+            int x = 1001;
+            GetAString getAString = x.ToString;
+            GetAString getAString2 = new GetAString(x.ToString);
+
+            //委托类型数组和当做参数使用
+            //委托数组
+            //委托数组实现的能力是一键调用一堆函数
+            DoubleOpDelegate[] operations = { MathOp.MultiplayByTwo, MathOp.Square };
+            //委托数组的调用
+            foreach (DoubleOpDelegate op in operations)
+            {
+                //一般委托数组遍历
+                op(3);
+                //委托做参数调用
+                ProcessAndDisplayRes(op,4);
+            }
+
+            //Action和Func委托
+            //Action和Func委托是系统内置的两种委托
+            //Action是返回值为空，任意参数数目的委托
+            //Func是利用最后一个参数为out x类型来制造返回值的委托，支持0-16个参数类型和一个返回值类型
+            //Action无参委托
+            //格式 Action<参数类别集> 委托变量名 = 方法；
+            Action method = Test2;
+            method();
+            //Action含参委托
+            Action<int> method2 = Test;
+            method2(1);
+
+            //Func无参委托
+            //格式 
+            //Func<参数类别集,返回值类型> 委托变量名 = 方法;
+            Func<string> f = Test3;
+            Console.WriteLine(f());
+            //Func有参委托
+            Func<int,string> f2 = Test4;
+            Console.WriteLine(f2(1));
+
+            //用委托优化冒泡排序
+            int[] sortArray = {1,21,52,3,21};
+            //Sort(sortArray);
+            //foreach (int i in sortArray)
+            //{
+            //    Console.Write(i + " ");
+            //}
+            Employee[] employees = { new Employee("A", 1998),new Employee("B",2001),new Employee("C",1574),new Employee("D",2156) };
+            //使用委托进行方法优化
+            //优化后的冒泡排序允许对很多类型进行比较
+            Sort<Employee>(employees, Employee.CompareSalary);
+            foreach (Employee emp in employees)
+            {
+                Console.WriteLine(emp.name + ":" + emp.Salary);
+            }
+
+            //多播委托
+            //多播委托，包含多个方法的委托，多播委托可按顺序调用多个方法，但是只能得到最后一个方法的返回值
+            //多播委托可以理解为一个包含了多个同类函数的委托集合
+            //中间一旦出异常则多播委托暂停
+            Action action1 = Test5;
+            action1 += Test6;
+            action1();
+
+            //多播委托转委托数组
+            Delegate[] delegates2 = action1.GetInvocationList();
+            foreach (Delegate d in delegates2)
+            {
+                //动态调用委托
+                d.DynamicInvoke();
+            }
+        }
+        private static void Test(int x)
+        {
+            Console.WriteLine("test" + x);
+        }
+        private static void Test2()
+        {
+            Console.WriteLine("Action");
+        }
+        public static string Test3()
+        {
+            return "siki";
+        }
+        private static string Test4(int x)
+        {
+            return x.ToString();
+        }
+        //private static void Sort(int[] sortArray)
+        //{
+        //    bool swapped = true;
+        //    //一般写法
+        //    //for (int i = 0; i < sortArray.Length; i++)
+        //    //{
+        //    //    swapped = false;
+        //    //    for (int j = 0; j < sortArray.Length - 1 - i; j++)
+        //    //    {
+        //    //        if (sortArray[j] > sortArray[j + 1])
+        //    //        {
+        //    //            int temp = sortArray[j];
+        //    //            sortArray[j] = sortArray[j + 1];
+        //    //            sortArray[(j + 1)] = temp;
+        //    //            swapped = true;
+        //    //        }
+        //    //    }
+        //    //    if (swapped == false)
+        //    //    {
+        //    //        return;
+        //    //    }
+        //    //}
+        //    //写法2
+        //    do
+        //    {
+        //        swapped = false;
+        //        for (int i = 0; i < sortArray.Length - 1; i++)
+        //        {
+        //            if (sortArray[i] > sortArray[i + 1])
+        //            {
+        //                int temp = sortArray[i];
+        //                sortArray[i] = sortArray[i + 1];
+        //                sortArray[i + 1] = temp;
+        //                swapped = true;
+        //            }
+        //        }
+        //    }
+        //    while (swapped);
+        //}
+
+        //使用委托进行优化
+        //泛型委托
+        public static void Sort<T>(T[] data,Func<T,T,bool> compare)
+        {
+            bool swapped = true;
+            do
+            {
+                swapped = false;
+                for (int i = 0; i < data.Length - 1; i++)
+                {
+                    if (compare(data[i], data[i + 1]))
+                    {
+                        T temp = data[i];
+                        data[i] = data[i + 1];
+                        data[i + 1] = temp;
+                        swapped = true;
+                    }
+                }
+            }while (swapped);
+        }
+        delegate double DoubleOpDelegate(double x);
+        //委托做参数
+        static void ProcessAndDisplayRes(DoubleOpDelegate op, double value)
+        {
+            double result = op(value);
+            Console.WriteLine("Result:" + result);
+        }
+        //多播委托
+        private static void Test5()
+        {
+            Console.WriteLine("Test5");
+        }
+        private static void Test6()
+        {
+            Console.WriteLine("Test6");
+        }
+
+    }
+}
