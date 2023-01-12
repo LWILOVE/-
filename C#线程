@@ -1,0 +1,127 @@
+每个进程都是由多个线程组成的
+单线程的缺点：一次只能执行一类事件
+              如果让计算机同时执行多个事件，那么会造成程序假死（无法响应）
+线程分为前台进程和后台进程
+前台线程：只有所有的前台线程都关闭才能完成程序关闭
+后台线程：只要所有的前台线程结束，后台线程自动结束
+
+线程是非常重要的一块知识，很多一些知识都要用到多线程，一般这些用到了多线程的功能都喜欢加上异步两个字
+
+1.进程的一些知识
+Process[] pros = Process.GetProcesses();  获得正在运行的所有线程
+foreach (var item in pros)
+ {
+      item.Kill();//杀掉所有进程  这个做法如果电脑没有保护机制会让你原地去世
+      Console.WriteLine(item);
+}                 杀掉你的进程，还是原地去世吧
+//通过进程打开一些应用程序
+//Process.Start("calc");//计算器
+//Process.Start("mspaint");//画图工具
+//Process.Start("notepad");//记事本
+//Process.Start("iexplore", "https://www.baidu.com/");//通过路径打开浏览器
+通过一个进程打开指定文件
+ProcessStartInfo psi = new ProcessStartInfo(@"C:\Users\User\Desktop\xse.txt"); 获取目标进程
+Process p = new Process();    新建进程对象
+p.StartInfo = psi;            让进程对象指向目标进程
+p.Start();				    指向目标进程
+
+2.线程
+线程的常用类是Thread
+线程的控制：
+控制线程：
+1.获取线程的状态：（Running or Unstarted），即使Start了也不代表线程变成了Running状态，只有当线程调度器选择运行该线程时才意味着这个线程是Running状态，使用Thread.Sleep可以使线程进入休眠状态WaitSleepJoin
+2.使用Thread对象的Abort（）方法可以停止线程（一般不用，用Try catch就行）
+3.使用Thread对象的Join方法可以把当前线程进入休眠状态，而本线程进入Running状态，直到加入的线程完成为止
+
+（1）线程的创建
+创建线程：
+            Thread t = new Thread(Test);
+            Thread t2 = new Thread(()=>Console.WriteLine("Child" + Thread.CurrentThread.ManagedThreadId));
+            Thread t3 = new Thread(Download);
+            Thread t4 = new Thread(ThreadMain) { IsBackground = true };
+第一种创建是根据有名无参方法创建线程，Test是已定义的方法
+第二种创建是根据匿名方法创建线程
+第三种创建是根据有名有参方法创建线程，不过这个创建方法支持的参数貌似只有一个，且要求这个参数是Object类型
+第四种创建是将创建的线程定义为后台线程，因为默认创建的线程是前台线程，ThreadMain是无参方法
+
+（2）启动线程：t.Start();
+启动线程直接使用start就行
+            //启动线程
+            t.Start();
+            t2.Start();
+            t3.Start(100);
+      
+（3）改变线程优先级：t.Priority();
+因为一个CPU同一时间只能执行一件事，所以多线程之间自然存在优先级的问题，优先级高的线程在执行时总是具备更多的执行时间
+线程优先级有五个：Highest,AboveNormal,Normal,BelowNormal和Lowest（从高到低）
+            t.Priority = ThreadPriority.AboveNormal;
+
+（4）线程的中途加入：t.Join();
+线程的中途加入会导致当前正在执行的线程进入休眠状态，当加入的线程完成工作退出时才能醒过来
+
+（5）关于线程的一些其他内容：
+Thread.Sleep(1000);：线程休眠，单位：毫秒
+Thread还有很多其他的属性方法
+
+（6）线程池：ThreadPool
+当任务数量巨大时，单线程执行任务会变得非常的慢，于是就有了多线程
+除了系统自带了一个线程外，其实上面我们已经算在使用多线程了
+线程池诞生是为了进一步提高程序的执行效率，因为创建线程是需要时间的，所以系统已经创建了一个拥有巨大线程数的线程池给我们用了
+线程池里的线程都是后台线程
+启动线程池：
+ThreadPool.QueueUserWorkItem(Download);
+
+（7）任务
+命名空间System.Threading.Tasks包含了类抽象出了线程功能，在后台使用ThreadPool进行管理的，任务表示应完成某个单元的工作，该工作可以在单独的线程中运行，也可以同步方式启动一个任务，
+同时任务也是异步编程中的一种实现方法
+任务属于后台线程
+
+创建任务方式有两种：
+1.通过任务工厂创建任务
+在任务工厂发布的任务在发布时就会执行，不需要Start
+       //创建任务工厂
+       TaskFactory tf = new TaskFactory();
+       //开启任务
+       //返回值任务类型可以获取本次任务的一些相关信息
+       Task t = tf.StartNew(test);
+       //test是已定义的无参方法
+2.直接发布的任务
+直接发布的任务需要通过start方法启动
+       Task t1 = new Task(test);
+       t1.Start();
+
+连续任务：
+连续任务会在上一个任务执行完后再执行，连续任务的方法的参数必须是Task类型
+//FirstDownload是无参方法，SecondAlert参数是Task
+            //执行下载的任务
+            Task t1 = new Task(FirstDownload);
+            //连续任务设置
+            //连续任务对应的方法的参数必须是Task
+            Task t2 = t1.ContinueWith(SecondAlert);
+            //继续连续
+            Task t3 = t2.ContinueWith(SecondAlert);
+            t1.Start();
+            
+多线程的冲突解决
+如果某个方法同时被多个线程同时访问，那么就容易出现线程的访问冲突问题
+冲突的结果就是程序逻辑混乱，可能会出现一些让人意想不到的结果，为此C#中代入了lock锁来解决这些问题
+
+            //使用锁
+            //当多个线程同时想要调用锁的内容时，锁只会让一个线程进入，其他线程要等进入的线程出来才能进去
+            //相应的，锁的使用会导致运行速度有所下降
+            //若一把锁锁住了多个资源则容易造成资源使用不均
+            //但是如果使用多把锁锁住多个资源就容易出现死锁
+            //死锁：当一把锁被多个方法调用时，因为锁只有一个，而当线程A拿走锁A时，本应继续拿走锁B，但是线程B拿走了锁B要拿锁A，此时两者就会因为没拿到锁而导致程序卡死
+            //解决死锁问题：统一拿锁顺序
+锁的语法：
+使用锁以前要先定义一下锁的对象
+锁对象是Object类型
+        private Object _lock1 = new Object();
+        private Object _lock2 = new Object();
+启动锁：
+            lock (_lock1)
+            {
+                lock (_lock2)
+                {
+                }
+            }
