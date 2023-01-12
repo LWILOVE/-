@@ -1,0 +1,60 @@
+Json是存储和交换文本信息的语法，与XML类似，但是具备更小更快，更易解析的特点，适用于轻量级的数据交换
+JSON是独立于语言外的，因而使用范围很大，且易于人和机器读取
+JSON语法规则
+1.数据在键值对中
+2.数据由逗号分隔，
+3.花括号保存对象{}(Json的对象可以理解为XML的元素)
+4.方括号保存数组[]
+Json书写案例：
+{
+"name":"A",
+"maxHP":300,
+"type":"N",
+"skillList":[
+	{ "id":22,"name":"M1","damage":221},
+	{ "id":23,"name":"M2","damage":222},
+	{ "id":24,"name":"M3","damage":223}	
+]
+}
+其实Json在浏览器上直接搜索Json进官网查能得到巨好的效果
+关于Json的解析问题，Json在C#上解析是比XML方便很多的，只需要在C#上建立一个包含和Json文件的键名完全相同的属性然后用C#的Json系列包进行内容接收就行
+Json是小游戏存读档的常用手段之一。
+
+Json解析：
+            ////使用JSON.Net解析JSON文件
+            ////将skills文件读进来
+            //Skill[] skillArray = JsonConvert.DeserializeObject<Skill[]>(File.ReadAllText(@"C:\Users\User\source\repos\Json操作\Skills.txt"));
+            ////要求：skill类中的属性名应该和文件的键一样
+            ////JSON文件的值是自动赋予的
+            //foreach (Skill s in skillArray)
+            //{
+            //    Console.WriteLine(s.id + "," + s.name + "," + s.damage);
+            //}
+
+            ////使用序列化知识操作
+            //Skill skill = new Skill();
+            //skill.id = 155;
+            //skill.name = "123";
+            //skill.damage = 54;
+            ////将对象序列化(这个序列化是变成JSON格式)
+            //string str = JsonConvert.SerializeObject(skill);
+            //Console.WriteLine(str);
+            //string[] names = { "M","I","C"};
+            //string str = JsonConvert.SerializeObject(names);
+            //Console.WriteLine(str);
+
+            ////将内容反序列化为一个集合
+            //List<Skill> skillArray = JsonConvert.DeserializeObject<List<Skill>>(File.ReadAllText(@"C:\Users\User\source\repos\Json操作\Skills.txt"));
+            //foreach (Skill s in skillArray)
+            //{
+            //    Console.WriteLine(s.id + "," + s.name + "," + s.damage);
+            //}
+
+            Hero hero = JsonConvert.DeserializeObject<Hero>(File.ReadAllText(@"C:\Users\User\source\repos\Json操作\Hero.txt"));
+            Console.WriteLine(hero.name);
+            Console.WriteLine(hero.type); 
+            Console.WriteLine(hero.maxHP);
+            foreach (Skill s in hero.skillList)
+            {
+                Console.WriteLine(s.id + s.name + s.damage);
+            }
