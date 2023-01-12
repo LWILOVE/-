@@ -1,0 +1,67 @@
+特性是一种允许我们向程序的程序集增加元数据的语言结构，它是用于保存程序结构信息的某种特殊类型的类
+类和特性的关系不是一对一的，可以是一对多的
+特性的作用感觉就是另一种注释
+1.弃用特性：Obsolete
+        //被标记弃用的方法虽然可以正常使用，但是在使用时会给出一个提示
+        //命名空间：System
+        //参数1：使用时提示内容  参数2：是否禁用（true是禁用）   
+        [Obsolete("这是个提示，本方法已弃用，请使用新方法：NewTest")]//特性：弃用
+        static void Test()
+        {
+            Console.WriteLine("AABB");
+        }
+2.状态特性：Conditional
+        //状态特性可以利用宏来控制本方法能不能被调用
+        //命名空间：System.Diagnostics
+        //当宏未定义或被禁用时，被状态特性影响的方法失活
+        //值得注意的是C#中宏定义必须在命名空间前，否则会报错
+        [Conditional("IsShowMessage")]//特性：状态
+        static void ShowMessage(string str)
+        {
+            Console.WriteLine(str);
+        }
+3.调用者信息特性：CallerLineNumber，CallerFilePath，CallerMemberName
+        //调用者信息特性所控制的参数必须有默认值
+        //命名空间：System.Runtime.CompilerServices
+        //调用者信息特性可以获取调用本方法的行列数，文件路径等等
+        //与一般特性不同，调用者信息特性拥有3个关键字，且调用者信息特性会自动获取调用者的信息
+        //CallerLineNumber:获取调用者所在的行
+        //CallerFilePath：获取调用者所在的文件路径
+        //CallerMemberName:获取调用者所在的方法名（如Main）
+        static void ShowMessage2(string message,[CallerLineNumber]int lineNumber = 0, [CallerFilePath]string filePath = "", [CallerMemberName]string memberName = "")//特性：调用者信息
+        {
+            Console.WriteLine(message);
+            Console.WriteLine(lineNumber);
+            Console.WriteLine(filePath);
+            Console.WriteLine(memberName);
+        }
+4. 调试跳过特性：DebuggerStepThrough
+        //调试跳过特性标记的方法在调试时会被自动跳过 
+        [DebuggerStepThrough]//特性：调试跳过
+        static void ShowMessage3(string message, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "")//特性：调用者信息
+        {
+            Console.WriteLine(message);
+            Console.WriteLine(lineNumber);
+            Console.WriteLine(filePath);
+            Console.WriteLine(memberName);
+        }
+人为特性常用的感觉就上面那几了，接下来是自定义特性的知识
+自定义特性是我们根据自身需求不同而定制的一种特性
+            //所有自定义特性的类都必须以Attribute结尾且要继承于系统的Attribute类,不过在使用时不需要加上Attribute
+            //特性类的声明推荐是密封的，即sealed（不可被继承，可以继承别人） 
+    通过系统自带的特性指引就能指定本特性的面向对象是什么
+    [AttributeUsage(AttributeTargets.Class)]//点明本特性的作用目标是类
+自定义特性的使用基本上和一般特性是一样的
+
+使用反射也可以获取类所用的特性的信息
+            Type t = typeof(Program);
+            //判断本类是否使用（定义）了特性Information
+            bool result = t.IsDefined(typeof(InformationAttribute),false);
+            Console.WriteLine(result);
+            //获取本类已经继承的特性
+            object[] attributeArray = t.GetCustomAttributes(false);
+            foreach (var item in attributeArray)
+            {
+                //查看特性的类型
+                Console.WriteLine(item.GetType());
+            }
