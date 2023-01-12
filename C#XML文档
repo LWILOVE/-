@@ -1,0 +1,98 @@
+XML是一门可扩展语言，用于传输和存储数据，也用于结构化，存储和传输信息。
+XML语法规则和XML文档的书写
+1.XML元素必须有始末标签<p>:始标签 </p>：末标签
+2.XML标签对大小写敏感
+3.XML有严格的书写顺序（终起规则严格）
+4.XML必须有根元素<root></root>
+5.XML属性值需要加引号  <note data = “111”></note>
+6.XML注释：<!--  内容 -->
+7.XML命名规则：1.名称能带字母，数字，字符，不以数字，标点符号开始，不以xml，Xml，XML开始，不含空格
+XML文件书写案例：
+<?xml version="1.0" encoding="utf-8" ?> 
+<skills>
+	<!-- 我的第一个XML文档注释-->
+	<skill>
+		<id>2</id>
+		<!--lang：语言  cn中文-->
+		<name lang ="cn">录入1</name>
+		<damage>0.1</damage>
+	</skill>
+	<skill>
+		<id>4</id>
+		<name lang ="cn">录入2</name>
+		<damage>0.2</damage>
+	</skill>
+	<skill>
+		<id>6</id>
+		<name lang ="cn">录入3</name>
+		<damage>0.3</damage>
+	</skill>
+</skills>
+第一行：版本解释
+其他：内容
+<!-- -->:注释
+关于用C#解析XML文档：
+命名空间：System.xml
+
+//使用一个类来管理文件
+            List<Skill> list = new List<Skill>();
+            //XML文档解析
+            XmlDocument xmlDoc = new XmlDocument();
+            //文档加载
+            //通过路径加载
+            //xmlDoc.Load(@"C:\Users\User\source\repos\XML知识\Skills.xml");
+            //通过字符串加载
+            xmlDoc.LoadXml(File.ReadAllText("Skills.xml"));
+            //根标签读取
+            //第一行是版本说明，所以是第二行才算正式内容
+            XmlNode root = xmlDoc.ChildNodes[1];
+            //获取根节点下的子节点
+            XmlNodeList skillList = root.ChildNodes;
+            //将子节点都解析出来
+            foreach (XmlNode skill in skillList)
+            {
+                Skill skillObj = new Skill();
+                //得到更小级的子节点
+                //方式1：
+                //foreach (XmlNode node in skill.ChildNodes)
+                //{
+                //    //node.name:节点名获取
+                //    //node.InnerText:节点内容获取(含注释)
+                //    //Console.WriteLine(node.Name + ":" + node.InnerText);
+                //    if (node.Name == "id")
+                //    {
+                //        skillObj.ID = Int32.Parse(node.InnerText);
+                //    }
+                //    else if (node.Name == "name")
+                //    {
+                //        skillObj.Name = node.InnerText;
+                //        //获取这个标签的属性
+                //        skillObj.Lang = node.Attributes[0].Value;
+                //    }
+                //    else if(node.Name == "damage")
+                //    {
+                //        skillObj.Damage = float.Parse(node.InnerText);
+                //    }
+                //}
+                //方式2   
+                //这个方式访问到的是查到的节点的整个元素
+                XmlElement idEle = skill["id"];
+                skillObj.ID = Int32.Parse(idEle.InnerText);
+
+                XmlElement nameEle = skill["name"];
+                skillObj.Name = nameEle.InnerText;
+                //获取这个节点的属性
+                XmlAttributeCollection attriCol = nameEle.Attributes;
+                XmlAttribute attri =  attriCol["lang"];
+                skillObj.Lang = attri.Value;
+
+                XmlElement damageEle = skill["damage"];
+                skillObj.Damage = float.Parse(damageEle.InnerText);
+
+                if (skillObj != null)
+                { list.Add(skillObj); }
+            }
+            foreach (Skill s in list)
+            {
+                Console.WriteLine(s.ID + s.Name + s.Lang + s.Damage);
+            }
