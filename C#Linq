@@ -1,0 +1,132 @@
+不知道要说啥，直接复制代码过来了..
+只能说Linq是一个很好的用来整理和排序的工具
+
+            //初始化武林高手
+            var master = new List<MartialArtsMaster>(){
+                new MartialArtsMaster(){ Id = 1, Name = "黄蓉",    Age = 18, Menpai = "丐帮", Kungfu = "打狗棒法",  Level = 9  },
+                new MartialArtsMaster(){ Id = 2, Name = "洪七公",  Age = 70, Menpai = "丐帮", Kungfu = "打狗棒法",  Level = 10 },
+                new MartialArtsMaster(){ Id = 3, Name = "郭靖",    Age = 22, Menpai = "丐帮", Kungfu = "降龙十八掌",Level = 10 },
+                new MartialArtsMaster(){ Id = 4, Name = "任我行",  Age = 50, Menpai = "明教", Kungfu = "葵花宝典",  Level = 1  },
+                new MartialArtsMaster(){ Id = 5, Name = "东方不败",Age = 35, Menpai = "明教", Kungfu = "葵花宝典",  Level = 10 },
+                new MartialArtsMaster(){ Id = 6, Name = "林平之",  Age = 23, Menpai = "华山", Kungfu = "葵花宝典",  Level = 7  },
+                new MartialArtsMaster(){ Id = 7, Name = "岳不群",  Age = 50, Menpai = "华山", Kungfu = "葵花宝典",  Level = 8  },
+                new MartialArtsMaster() { Id = 8, Name = "令狐冲", Age = 23, Menpai = "华山", Kungfu = "独孤九剑", Level = 10 },
+                new MartialArtsMaster() { Id = 9, Name = "梅超风", Age = 23, Menpai = "桃花岛", Kungfu = "九阴真经", Level = 8 },
+                new MartialArtsMaster() { Id =10, Name = "黄药师", Age = 23, Menpai = "梅花岛", Kungfu = "弹指神通", Level = 10 },
+                new MartialArtsMaster() { Id = 11, Name = "风清扬", Age = 23, Menpai = "华山", Kungfu = "独孤九剑", Level = 10 }
+            };
+            //初始化武学
+            var kongfu = new List<Kongfu>(){
+                new Kongfu(){KongfuId=1, KongfuName="打狗棒法", Lethality=90},
+                new Kongfu(){KongfuId=2, KongfuName="降龙十八掌", Lethality=95},
+                new Kongfu(){KongfuId=3, KongfuName="葵花宝典", Lethality=100},
+                new Kongfu() { KongfuId=  4, KongfuName = "独孤九剑", Lethality = 100 },
+                new Kongfu() { KongfuId = 5, KongfuName = "九阴真经", Lethality = 100 },
+                new Kongfu() { KongfuId = 6, KongfuName = "弹指神通", Lethality = 100 }
+            };
+
+            //使用Linq对信息进行查询
+            //一般查询
+            //查询所有武学级别大于8的武林高手
+            //var res = new List<MartialArtsMaster>();
+            //foreach (var temp in master)
+            //{
+            //    if (temp.Level > 8)
+            //    {
+            //        res.Add(temp);
+            //    }
+            //}
+            //foreach (var temp in res)
+            //{
+            //    Console.WriteLine(temp);
+            //}
+            //Console.ReadKey();
+            //Linq查询(表达式写法)
+            //Linq表达式
+            //from :要查的数集
+            //where：筛选条件
+            //select：筛选结果
+            var res = from m in master
+                      where m.Level>8 && m.Menpai == "丐帮"
+                      select m;
+            foreach (var temp in res)
+            {
+                Console.WriteLine(temp);
+            }
+            Console.ReadKey(true);
+            //Linq扩展写法
+            //():一个过滤方法
+            //var res2 = master.Where(Test1);
+            //():一个Lambda表达式
+            //var res2 = master.Where(m=>m.Level>8&&m.Menpai == "丐帮");
+            //foreach (var temp in res2)
+            //{
+            //    Console.WriteLine(temp);
+            //}
+            //Console.ReadKey();
+
+            //Linq联合查询
+            //使用联合查询所有的子查询集都会和父查询集的元素进行匹配一次
+            //相当于子查询集变成了父查询集的一个附庸
+            //诞生的元素数共有子查询集数*父查询集数的数目
+            //var res3 = from m in master
+            //           from k in kongfu
+            //           where m.Kungfu == k.KongfuName && k.Lethality > 90
+            //          select new { master = m,kongfu = k};
+            //var res3 = master.SelectMany(m=>kongfu,(m,k)=>new { master = m,kongfu = k}).Where(x=>x.master.Kungfu == x.kongfu.KongfuName && x.kongfu.Lethality > 90);
+
+            //对查询结果做排序
+            //orderby descending
+            //orderby:默认从小到大
+            //加入descending后可以改变为倒序
+            //多条件排序以第一条件为主，剩下为辅
+            //var res2 = from m in master
+            //          where m.Level > 8 && m.Menpai == "丐帮"
+            //          //orderby m.Age descending
+            //          orderby m.Level,m.Age
+            //          select m;
+            //var res2 = master.Where(m=>m.Level >8 && m.Menpai == "丐帮").OrderBy(m=>m.Age);
+            //在扩展方法中，orderby适用于单条件排序，多条件用orderby+thenby
+            //var res2 = master.Where(m => m.Level > 8 && m.Menpai == "丐帮").OrderBy(m => m.Age).ThenBy(m=>m.Level);
+
+            //Join on 集合联合查询
+            //var res2 = from m in master
+            //           join k in kongfu on m.Kungfu equals k.KongfuName
+            //           where k.Lethality > 95
+            //           select new { master = m, kongfu = k };
+
+            //分组查询 into groups
+            //适用了into groups之后副元素会变成一系列的组
+            //var res2 = from k in kongfu
+            //           join m in master on k.KongfuName equals m.Kungfu
+            //           into groups
+            //           orderby groups.Count() descending
+            //           select new { kongfu = k, count = groups.Count()};
+
+            //按照自身字段进行分组 group by
+            //g.Key:Key表示是按什么属性进行分的组
+            //var res2 = from m in master
+            //           group m by m.Menpai 
+            //           into g
+            //           select new { count = g.Count(), Key = g.Key };
+
+            //量词操作符 any all
+            //只要在master指定字段中存在则为true
+            //bool res2 = master.Any(m => m.Menpai == "丐帮");
+            //只有在master指定字段中全为才为true
+            //bool res2 = master.All(m=>m.Menpai=="丐帮");
+            //Console.WriteLine(res2);
+            
+
+                //foreach (var temp in res2)
+            //{
+            //    Console.WriteLine(temp);
+            //}
+            Console.ReadKey();
+        }
+        //过滤方法
+        static bool Test1(MartialArtsMaster master)
+        {
+            if (master.Level > 8) return true;
+            return false;
+        }
