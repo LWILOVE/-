@@ -1,0 +1,25 @@
+反射：程序在运行时，可查看其他程序集或本身的元数据，该运行的程序查看本身的元数据或其他程序集的元数据的行为称之为反射。
+反射感觉上来讲好像就是类的另一种调用方法，通过反射基本可以知道被反射类的所有消息
+1.反射获取：反射使用的类是Type，命名空间是System.Reflection
+            //Type
+            //每个类都有唯一的Tpye对象
+            //通过类的类型获取
+            Type t = typeof(MyClass);
+            //通过类的对象获取
+            MyClass myclss = new MyClass();
+            Type t2 = myclss.GetType();
+ 2.通过反射得到的结果可以得到被反射方的所有的公开字段，属性，方法以及这个类的相关信息
+            //类名获取
+            Console.WriteLine(t.Name);
+            //获取类所在的命名空间
+            Console.WriteLine(t.Namespace);
+            //获取类所在的程序集
+            Console.WriteLine(t.Assembly);
+            //获取类的所有公开字段(保护的也不行)
+            FieldInfo[] fis =  t.GetFields();
+            //获取类中所有的公开属性
+            PropertyInfo[] pis = t.GetProperties();
+            //获取类中所有的公开方法(含父类的)
+            MethodInfo[] mis = t.GetMethods();
+            注：获取的公开方法是包含父类的方法的，可以自己测试一下。
+            
